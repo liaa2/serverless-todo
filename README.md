@@ -1,1 +1,1 @@
-serverless + lambda + dynamoDb
+serverless + lambda + dynamoDb + express + serverless-offline

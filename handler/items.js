@@ -74,6 +74,8 @@ module.exports = {
   retrieve,
 }
 
+// to deploy - run `serverless deploy --stage dev --region us-east-1`
+
 
 // 'use strict';
 

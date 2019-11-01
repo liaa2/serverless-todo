@@ -20,6 +20,26 @@ service: todo
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
 
+plugins:
+ - serverless-dynamodb-local
+ - serverless-offline
+
+custom:
+  endpoints:
+    dynamodb-url: 'http://localhost:8000'
+
+  tableNames:
+    persons: 'test-persons'
+
+  bucketNames:
+    personsImages: 'test-person-images'
+
+  dynamodb: 
+    start:
+      migrate: true
+    stages:
+      - dev
+
 provider:
   name: aws
   runtime: nodejs10.x
@@ -52,6 +72,9 @@ provider:
         Action:
           - "dynamodb:DeleteItem"
         Resource: "*"
+  environment:
+    CONFIG_PERSONS_TABLE: ${self:custom.tableNames.persons}
+    CONFIG_DYNAMODB_ENDPOINT: ${self:custom.endpoints.dynamodb-url}
 
 # you can overwrite defaults here
 #  stage: dev
@@ -88,7 +111,7 @@ provider:
 
 functions:
   create:
-    handler: handler.create
+    handler: handler/items.create
     events:
       - http:
           path: items
@@ -102,7 +125,7 @@ functions:
               - X-Amz-Date
 
   retrieve:
-    handler: handler.retrieve
+    handler: handler/items.retrieve
     events:
       - http:
           path: items/{id}
@@ -114,8 +137,22 @@ functions:
             headers:
               - Content-Type
               - X-Amz-Date
+  
+  persons:
+    timeout: 30
+    handler: handler/persons.handler
+    events:
+      - http:
+          path: /persons 
+          method: get
+          cors: true
+      - http:
+          path: /persons
+          method: post
+          cors: true
 
-
+resources:
+  - ${file(resources/persons-table.yml)}
   # hello:
   #   handler: handler.hello
 #    The following are a few example events you can configure
